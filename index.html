@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+	<title>GaiaTone</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	
+	<script src="build/Tone.min.js"></script>
+	<script src="build/jquery.min.js"></script>
+	<script src="scripts/StartAudioContext.js"></script>
+	<script src="scripts/Interface.js"></script>
+
+	<script>
+		// jshint ignore: start
+	</script>
+
+</head>
+<body>	
+	<div id="Content" class="FullScreen">
+		<div id="Title">PolySynth</div>
+		<div id="Explanation">
+		</div>
+	</div>
+
+	<script>
+        var synth = new Tone.FMSynth({
+			"modulationIndex" : 12.22,
+			"envelope" : {
+				"attack" : 0.01,
+				"decay" : 0.2
+			},
+			"modulation" : {
+				"type" : "square"
+			},
+			"modulationEnvelope" : {
+				"attack" : 0.2,
+				"decay" : 0.01
+			}
+		}).toMaster();
+
+		// GUI //
+        synth.triggerAttack(256.0);
+	</script>
+</body>
+</html>
