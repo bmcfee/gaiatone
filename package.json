@@ -1,0 +1,25 @@
+{
+  "name": "gaiatone",
+  "version": "1.0.0",
+  "description": "Sonifying space",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bmcfee/gaiatone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bmcfee/gaiatone/issues"
+  },
+  "homepage": "https://github.com/bmcfee/gaiatone#readme",
+  "dependencies": {
+    "flux": "^3.1.3",
+    "react": "^16.3.2",
+    "require": "^2.4.20",
+    "tone": "^0.12.80"
+  }
+}
