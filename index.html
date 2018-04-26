@@ -6,24 +6,23 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	
-	<script src="build/Tone.min.js"></script>
-	<script src="build/jquery.min.js"></script>
-	<script src="scripts/StartAudioContext.js"></script>
-	<script src="scripts/Interface.js"></script>
+	<script type="javascript" src="build/Tone.js"></script>
+	<script type="javascript" src="build/jquery.min.js"></script>
+	<script type="javascript" src="scripts/StartAudioContext.js"></script>
+	<script type="javascript" src="scripts/Interface.js"></script>
 
-	<script>
+	<script type="javascript">
 		// jshint ignore: start
 	</script>
 
 </head>
 <body>	
 	<div id="Content" class="FullScreen">
-		<div id="Title">PolySynth</div>
-		<div id="Explanation">
-		</div>
+        <div id="controls"></div>
 	</div>
 
-	<script>
+	<script type="javscript">
+        /*
         var synth = new Tone.FMSynth({
 			"modulationIndex" : 12.22,
 			"envelope" : {
@@ -37,10 +36,49 @@
 				"attack" : 0.2,
 				"decay" : 0.01
 			}
-		}).toMaster();
+		}).toMaster();        
+        */
+
+        function metallicity_to_modulation(m) {
+            // Convert Fe/H [-2, 1] to a modulation index (0, 100)
+            return Math.min(m + 2, 0.001) * 33;
+        }
+
+        function logg_to_adsr(logg) {
+            // Convert log(g) [5, 0] to an ADSR envelope
+            // large values = slow attack/decay
+            // small values = fast attack/decay
+
+            // attack in [0.005, 1]
+            // decay in  [0.01, 1]
+
+            var value = Math.max(Math.min(logg / 5, 1), 0.01)
+
+            return {'attack': value, 'decay': value}
+        }
+
+        var synths;
+
+        $.getJSON('data.json', function (data) {
+            // Iterate over data, making synthesizers
+            for (var i in data) {
+                // data[i] = (T_eff, log(g), Fe/H)
+
+                var nsynth = new Tone.FMSynth({
+                                "modulationIndex": metallicity_to_mod(data[i][2]),
+                                "envelope": logg_to_adsr(data[i][1]),
+                                "modulation": { "type": "square" },
+                                "modulationEnvelope" : {"attack" : 0.2, "decay" : 0.01 }
+                            }).toMaster();
+                synths.push(nsynth);
+
+                // what about f0?
+                // Add a control here too
+            }
+        });
 
 		// GUI //
-        synth.triggerAttack(256.0);
+        //synth.triggerAttack(256.0);
 	</script>
 </body>
 </html>
