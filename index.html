@@ -44,13 +44,15 @@
                 The timbre of the tone relates to the star's <a href="https://en.wikipedia.org/wiki/Metallicity">metallicity</a>.
             </p>
             <p>Use your mouse or arrow-keys to pan, tilt, and zoom around the visual field.  If you listen on headphones, the position of each star relative to the camera should be
-            audible.</p>
+            audible. Pan around until you start to hear something!</p>
             <p><small>This project was started at the NYC Gaia DR2 Workshop at the Center for Computational Astrophysics of the Flatiron Instititute, April 2018.</small></p>
             <p><a href="https://bmcfee.github.io/">Brian McFee</a> - <a href="https://github.com/bmcfee/gaiatone">source code</a>
         </div>
 	</div>
 
 	<script>
+        var playing = false;
+
         function allStart(max) {
             max = max || synths.length;
             for (var i in synths) {
@@ -59,11 +61,13 @@
                 }
                 synths[i].start();
             }
+            playing = true;
         }
         function allStop() {
             for (var i in synths) {
                 synths[i].stop();
             }
+            playing = false;
         }
         function metallicity_to_modulation(metallicity) {
             // Fe/H effective range: -0.19, 0.04
@@ -142,8 +146,8 @@
 			key : 32,
 			type : "toggle",
 			text : "Start Sound (spacebar)",
-			activeText : "Stop (spacebar)",
-			start : function(){ allStart(); },
+			activeText : "Stop the noise (spacebar)",
+			start : function(){ allStart(0); },
 			end : function(){ allStop(); }
 		});
 		// THREE.JS //
@@ -206,7 +210,7 @@
 
                     if (synths[i].state == "stopped") {
                         // is it too far away?
-                        if (distance < max_distance) {
+                        if (distance < max_distance && playing) {
                             synths[i].start();
                         }
                     } else {
