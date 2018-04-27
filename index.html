@@ -37,7 +37,7 @@
         function temp_to_f0(temp) {
             // Teff range: 5165 -> 6575
             
-            return Math.max(0, (temp - 5165) / (6575. - 5165) * 2000) + 32;
+            return Math.max(0, (temp - 5165) / (6575. - 5165)) * 500 + 16;
         }
 
         function logr_to_dip(logr) {
@@ -77,19 +77,27 @@
                 //create an autofilter and start it's LFO
                 var autoFilter = new Tone.AutoFilter(1 + Math.random(),
                                                      100,
-                                                     dip).toMaster().start();
+                                                     dip).start();
+                nsynth.sync();
                 nsynth.connect(autoFilter);
+
+                var spatial = new Tone.Panner3D((data[i]['x'] + 0.1127) * 500,
+                                                (data[i]['y'] - 0.1333) * 500,
+                                                (data[i]['z'] - 0.0624) * 100).toMaster();
+                spatial.distanceModel = 'exponential'
+                console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
+                autoFilter.connect(spatial);
 
                 synths.push(nsynth);
 
                 // Add a control here too
 
                 // Tone breaks if we add too many AutoFilters
-                if (i > 100) {
+                if (i > 50) {
                     break;
                 }
             }
-            //Tone.Transport.start();
+            Tone.Transport.start();
         });
 	</script>
 </body>
