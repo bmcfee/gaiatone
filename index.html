@@ -68,13 +68,13 @@
         function metallicity_to_modulation(metallicity) {
             // Fe/H effective range: -0.19, 0.04
             // beta range: 0.01 -> 100
-            return Math.max(metallicity + 0.2, 0.00) * 100 + 0.01;
+            return Math.max(metallicity + 0.2, 0.00) * 50 + 0.01;
         }
 
         function temp_to_f0(temp) {
             // Teff range: 5165 -> 6575
             
-            return Math.max(0, (temp - 5165) / (6575. - 5165)) * 100 + 16;
+            return Math.max(0, (temp - 5165) / (6575. - 5165)) * 100 + 32;
         }
 
         function logr_to_dip(logr) {
@@ -102,7 +102,7 @@
 
                 // modulation index from metallicity
                 nsynth.modulationIndex.value = beta;
-                nsynth.harmonicity.value = 3;
+                nsynth.harmonicity.value = 2;
 
                 nsynth.unsync();
 
