@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+	<title>GaiaTone</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	
+	<script src="build/Tone.min.js"></script>
+	<script src="build/jquery.min.js"></script>
+	<script src="scripts/StartAudioContext.js"></script>
+	<script src="scripts/Interface.js"></script>
+
+	<script>
+		// jshint ignore: start
+	</script>
+
+</head>
+<body>	
+	<div id="Content" class="FullScreen">
+        <div id="controls"></div>
+	</div>
+
+	<script>
+        function metallicity_to_modulation(metallicity) {
+            // Convert Fe/H [-2, 1] to a modulation index (0, 100)
+            return Math.max(-metallicity, 0.00) * 30 + 0.01;
+        }
+
+        function logg_to_adsr(logg) {
+            // Convert log(g) [5, 0] to an ADSR envelope
+            // large values = slow attack/decay
+            // small values = fast attack/decay
+
+            // attack in [0.005, 1]
+            // decay in  [0.01, 1]
+
+            var value = Math.max(Math.min(logg / 5, 1), 0.01)
+
+            return {'attack': value, 'decay': value, 'release': 1}
+        }
+
+        function temp_to_f0(temp) {
+            // map temperature [3e3, 1e5] to f0 [3e1, 2e3] (Hz)
+            
+            return temp / 100000. * 3000 + 32;
+        }
+
+        var synths = [];
+        var stellarData = []
+
+        $.getJSON('data.json', function (data) {
+            // Iterate over data, making synthesizers
+
+            for (var i in data) {
+                // data[i] = (T_eff, log(g), Fe/H)
+                stellarData.push(data[i]);
+
+                var f0 = temp_to_f0(data[i][0]);
+                var adsr = logg_to_adsr(data[i][1]);
+
+                var beta = metallicity_to_modulation(data[i][2]);
+
+                console.log('metallicity: ' + data[i][2] + '  |  beta: ' + beta);
+                console.log('       logg: ' + data[i][1] + '  |  adsr: ' + adsr);
+
+                // f0 from temperature
+                var nsynth = new Tone.FMOscillator(f0, "sine", "square");
+
+                // modulation index from metallicity
+                nsynth.modulationIndex.value = beta;
+                nsynth.harmonicity.value = 3;
+
+                // what to do with logg?
+
+                //create an autofilter and start it's LFO
+                var autoFilter = new Tone.AutoFilter(1 + 0.5 * Math.random(), 200, Math.max(2, data[i][1] -1)).toMaster().start();
+
+                //route an oscillator through the filter and start it
+                //var oscillator = new Tone.Oscillator().connect(autoFilter).start();
+
+                //nsynth.toMaster();
+                nsynth.connect(autoFilter);
+
+                synths.push(nsynth);
+
+                // Add a control here too
+            }
+            Tone.Transport.start();
+        });
+	</script>
+</body>
+</html>
