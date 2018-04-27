@@ -74,7 +74,7 @@
         function temp_to_f0(temp) {
             // Teff range: 5165 -> 6575
             
-            return Math.max(0, (temp - 5165) / (6575. - 5165)) * 500 + 16;
+            return Math.max(0, (temp - 5165) / (6575. - 5165)) * 100 + 16;
         }
 
         function logr_to_dip(logr) {
@@ -91,22 +91,11 @@
             // Iterate over data, making synthesizers
 
             for (var i in data) {
-                // Tone breaks if we add too many components :(
-//                if (i > 100) {
-  //                  break;
-    //            }
-
-                console.log(data[i])
-                // data[i] = (T_eff, log(g), Fe/H)
                 stellarData.push(data[i]);
 
                 var beta = metallicity_to_modulation(data[i]['feh']);
                 var f0 = temp_to_f0(data[i]['teff']);
                 var dip = logr_to_dip(data[i]['log_r']);
-
-                console.log('metallicity: ' + data[i]['feh'] + '  |  beta: ' + beta);
-                console.log('teff:        ' + data[i]['teff'] + '  |  f0: ' + f0);
-                console.log('log_r:       ' + data[i]['log_r'] + '  |  dip: ' + dip);
 
                 // f0 from temperature
                 var nsynth = new Tone.FMOscillator(f0, "sine", "square");
@@ -115,13 +104,7 @@
                 nsynth.modulationIndex.value = beta;
                 nsynth.harmonicity.value = 3;
 
-                //nsynth.toMaster();
-                //create an autofilter and start it's LFO
-//                var autoFilter = new Tone.AutoFilter(1 + Math.random(),
- //                                                    100,
-  //                                                   dip).start();
-                nsynth.sync();
-//                nsynth.connect(autoFilter);
+                nsynth.unsync();
 
                 var x = (data[i]['x'] + 0.1127) * 10000;
                 var y = (data[i]['y'] - 0.1333) * 10000;
@@ -129,27 +112,28 @@
 
                 var spatial = new Tone.Panner3D(x, y, z).toMaster();
 
-                spatial.distanceModel = 'exponential';
-                console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
-  //              autoFilter.connect(spatial);
+//                spatial.distanceModel = 'exponential';
+//                spatial.rolloffFactor = 1.5;
+//                spatial.maxDistance = 150;
+                //console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
                 nsynth.connect(spatial);
 
                 // Add the star to the scene
 
-                var geometry = new THREE.SphereBufferGeometry(1, 12, 12);
+                var geometry = new THREE.SphereBufferGeometry(0.8, 12, 12);
                 var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
                 var sphere = new THREE.Mesh( geometry, material );
                 sphere.position.x = x;
                 sphere.position.y = y;
                 sphere.position.z = z;
-                console.log(sphere)
+                //console.log(sphere)
                 scene.add( sphere );
 
                 synths.push(nsynth);
 
             }
             Tone.Transport.start();
-            console.log(scene);
+            //console.log(scene);
         });
 	</script>
 
@@ -159,7 +143,7 @@
 			type : "toggle",
 			text : "Start Sound (spacebar)",
 			activeText : "Stop (spacebar)",
-			start : function(){ allStart(15); },
+			start : function(){ allStart(); },
 			end : function(){ allStop(); }
 		});
 		// THREE.JS //
@@ -212,6 +196,25 @@
                 var r = Date.now() * 0.0005;
                 renderer.render( scene, camera );
                 controls.update();
+
+                var max_distance = 1500;
+
+                for (var i in stellarData) {
+                    var distance = Math.sqrt((camera.position['x'] - stellarData[i]['x'] * 10000)**2 
+                                             + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 
+                                             + (camera.position['z'] - stellarData[i]['z'] * 10000)**2)
+
+                    if (synths[i].state == "stopped") {
+                        // is it too far away?
+                        if (distance < max_distance) {
+                            synths[i].start();
+                        }
+                    } else {
+                        if (distance >= max_distance) {
+                            synths[i].stop();
+                        }
+                    }
+                }
             }
             animate()
 		}
