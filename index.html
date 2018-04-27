@@ -136,8 +136,8 @@
 
                 // Add the star to the scene
 
-                var geometry = new THREE.SphereBufferGeometry( 1, 3, 2 );
-                var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+                var geometry = new THREE.SphereBufferGeometry(1, 12, 12);
+                var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
                 var sphere = new THREE.Mesh( geometry, material );
                 sphere.position.x = x;
                 sphere.position.y = y;
@@ -159,12 +159,8 @@
 			type : "toggle",
 			text : "Start Sound (spacebar)",
 			activeText : "Stop (spacebar)",
-			start : function(){
-                allStart(15);
-			},
-			end : function(){
-                allStop();
-			}
+			start : function(){ allStart(15); },
+			end : function(){ allStop(); }
 		});
 		// THREE.JS //
 	
@@ -180,27 +176,6 @@
             camera.position.y = -720;
             camera.position.z = -390;
 			camera.updateMatrixWorld();
-
-            if (0) {
-                var bassMesh = new THREE.Mesh(
-                    new THREE.SphereBufferGeometry( 2, 16, 8 ),
-                    new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } )
-                );
-                scene.add(bassMesh);
-                bassMesh.position.z = -10
-
-                var dronMesh = new THREE.Mesh(
-                    new THREE.SphereBufferGeometry( 1, 16, 8 ),
-                    new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
-                );
-                scene.add(dronMesh);
-                
-                var chordMesh = new THREE.Mesh(
-                    new THREE.SphereBufferGeometry( 1, 16, 8 ),
-                    new THREE.MeshBasicMaterial( { color: 0xff00ff, wireframe: true } )
-                );
-                scene.add(chordMesh);
-            }
 
 			var renderer = new THREE.WebGLRenderer( { antialias: true } );
 			
@@ -235,18 +210,8 @@
             function animate() {
                 requestAnimationFrame( animate );
                 var r = Date.now() * 0.0005;
-                
-                //chordMesh.position.x = 3 * Math.cos( r );
-                //chordMesh.position.z = 3 * Math.cos( r );
-                //chordMesh.position.y = 3 * Math.sin( r );
-                //dronMesh.position.x = 4 * Math.cos( 2 * r );
-                //dronMesh.position.z = 4 * Math.sin( 2 * r );
                 renderer.render( scene, camera );
                 controls.update();
-
-                //greenSphere.updatePosition(dronMesh);
-                //blueSphere.updatePosition(bassMesh);
-                //whiteSphere.updatePosition(chordMesh);
             }
             animate()
 		}
