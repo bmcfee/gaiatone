@@ -108,13 +108,13 @@
 
                 var x = (data[i]['x'] + 0.1127) * 10000;
                 var y = (data[i]['y'] - 0.1333) * 10000;
-                var z = (data[i]['z'] - 0.0624) * 10000;
+                var z = (data[i]['z'] - 0.0624) * 20000;
 
                 var spatial = new Tone.Panner3D(x, y, z).toMaster();
 
-//                spatial.distanceModel = 'exponential';
+                spatial.distanceModel = 'exponential';
 //                spatial.rolloffFactor = 1.5;
-//                spatial.maxDistance = 150;
+                spatial.maxDistance = 1000;
                 //console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
                 nsynth.connect(spatial);
 
@@ -202,7 +202,7 @@
                 for (var i in stellarData) {
                     var distance = Math.sqrt((camera.position['x'] - stellarData[i]['x'] * 10000)**2 
                                              + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 
-                                             + (camera.position['z'] - stellarData[i]['z'] * 10000)**2)
+                                             + (camera.position['z'] - stellarData[i]['z'] * 20000)**2)
 
                     if (synths[i].state == "stopped") {
                         // is it too far away?
