@@ -28,10 +28,24 @@
 	</div>
 
 	<script>
+        function allStart(max) {
+            max = max || synths.length;
+            for (var i in synths) {
+                if (i > max) {
+                    break;
+                }
+                synths[i].start();
+            }
+        }
+        function allStop() {
+            for (var i in synths) {
+                synths[i].stop();
+            }
+        }
         function metallicity_to_modulation(metallicity) {
             // Fe/H effective range: -0.19, 0.04
             // beta range: 0.01 -> 100
-            return Math.max(metallicity + 0.2, 0.00) * 30 + 0.01;
+            return Math.max(metallicity + 0.2, 0.00) * 100 + 0.01;
         }
 
         function temp_to_f0(temp) {
@@ -81,10 +95,10 @@
                 nsynth.sync();
                 nsynth.connect(autoFilter);
 
-                var spatial = new Tone.Panner3D((data[i]['x'] + 0.1127) * 500,
-                                                (data[i]['y'] - 0.1333) * 500,
-                                                (data[i]['z'] - 0.0624) * 100).toMaster();
-                spatial.distanceModel = 'exponential'
+                var spatial = new Tone.Panner3D((data[i]['x'] + 0.1127) * 5000,
+                                                (data[i]['y'] - 0.1333) * 5000,
+                                                (data[i]['z'] - 0.0624) * 1000).toMaster();
+                spatial.distanceModel = 'exponential';
                 console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
                 autoFilter.connect(spatial);
 
@@ -93,7 +107,7 @@
                 // Add a control here too
 
                 // Tone breaks if we add too many AutoFilters
-                if (i > 50) {
+                if (i > 30) {
                     break;
                 }
             }
