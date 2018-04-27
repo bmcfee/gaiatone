@@ -53,15 +53,31 @@
 	<script>
         var playing = false;
 
+        function updatePlaying() {
+            var max_distance = 1500;
+
+            for (var i in stellarData) {
+                var distance = Math.sqrt((camera.position['x'] - stellarData[i]['x'] * 10000)**2 
+                                            + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 
+                                            + (camera.position['z'] - stellarData[i]['z'] * 20000)**2)
+
+                if (synths[i].state == "stopped") {
+                    // is it too far away?
+                    if (distance < max_distance && playing) {
+                        synths[i].start();
+                    }
+                } else {
+                    if (distance >= max_distance) {
+                        synths[i].stop();
+                    }
+                }
+            }
+        }
+
         function allStart(max) {
             max = max || synths.length;
-            for (var i in synths) {
-                if (i > max) {
-                    break;
-                }
-                synths[i].start();
-            }
             playing = true;
+            updatePlaying();
         }
         function allStop() {
             for (var i in synths) {
@@ -139,9 +155,7 @@
             Tone.Transport.start();
             //console.log(scene);
         });
-	</script>
 
-    <script id="GUI">
 		Interface.Button({
 			key : 32,
 			type : "toggle",
@@ -200,25 +214,7 @@
                 var r = Date.now() * 0.0005;
                 renderer.render( scene, camera );
                 controls.update();
-
-                var max_distance = 1500;
-
-                for (var i in stellarData) {
-                    var distance = Math.sqrt((camera.position['x'] - stellarData[i]['x'] * 10000)**2 
-                                             + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 
-                                             + (camera.position['z'] - stellarData[i]['z'] * 20000)**2)
-
-                    if (synths[i].state == "stopped") {
-                        // is it too far away?
-                        if (distance < max_distance && playing) {
-                            synths[i].start();
-                        }
-                    } else {
-                        if (distance >= max_distance) {
-                            synths[i].stop();
-                        }
-                    }
-                }
+                updatePlaying();
             }
             animate()
 		}
