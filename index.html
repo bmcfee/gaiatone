@@ -34,8 +34,8 @@
 
 	<div id="Content" class="FullScreen">
         <div id="three"></div>
+        <!--        <div id="controls"></div>-->
         <div>
-            <div id="controls"></div>
             <h4>What am I listening to?</h4>
             <p>
                 This is a chunk of stars in and around the <a href="https://en.wikipedia.org/wiki/Beehive_Cluster">Beehive cluster</a>.
@@ -54,12 +54,10 @@
         var playing = false;
 
         function updatePlaying() {
-            var max_distance = 1500;
+            var max_distance = 1250**2;
 
             for (var i in stellarData) {
-                var distance = Math.sqrt((camera.position['x'] - stellarData[i]['x'] * 10000)**2 
-                                            + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 
-                                            + (camera.position['z'] - stellarData[i]['z'] * 20000)**2)
+                var distance = (camera.position['x'] - stellarData[i]['x'] * 10000)**2 + (camera.position['y'] - stellarData[i]['y'] * 10000)**2 + (camera.position['z'] - stellarData[i]['z'] * 10000)**2;
 
                 if (synths[i].state == "stopped") {
                     // is it too far away?
@@ -74,8 +72,7 @@
             }
         }
 
-        function allStart(max) {
-            max = max || synths.length;
+        function allStart() {
             playing = true;
             updatePlaying();
         }
@@ -88,7 +85,7 @@
         function metallicity_to_modulation(metallicity) {
             // Fe/H effective range: -0.19, 0.04
             // beta range: 0.01 -> 100
-            return Math.max(metallicity + 0.2, 0.00) * 50 + 0.01;
+            return Math.max(metallicity + 0.2, 0.00) * 100 + 0.01;
         }
 
         function temp_to_f0(temp) {
@@ -128,14 +125,14 @@
 
                 var x = (data[i]['x'] + 0.1127) * 10000;
                 var y = (data[i]['y'] - 0.1333) * 10000;
-                var z = (data[i]['z'] - 0.0624) * 20000;
+                var z = (data[i]['z'] - 0.0624) * 10000;
 
                 var spatial = new Tone.Panner3D(x, y, z).toMaster();
 
-                spatial.distanceModel = 'exponential';
-//                spatial.rolloffFactor = 1.5;
-                spatial.maxDistance = 1000;
-                //console.log(i, spatial.positionX, spatial.positionY, spatial.positionZ);
+//                spatial.distanceModel = 'exponential';
+//                spatial.refDistance = 10;
+//                spatial.rolloffFactor = 10;
+//                spatial.maxDistance = 1000;
                 nsynth.connect(spatial);
 
                 // Add the star to the scene
@@ -161,7 +158,7 @@
 			type : "toggle",
 			text : "Start Sound (spacebar)",
 			activeText : "Stop the noise (spacebar)",
-			start : function(){ allStart(0); },
+			start : function(){ allStart(); },
 			end : function(){ allStop(); }
 		});
 		// THREE.JS //
@@ -171,28 +168,23 @@
 			var SCREEN_HEIGHT = document.querySelector("#three").clientHeight;
 			var aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 			var scene = new THREE.Scene()
-			var camera = new THREE.PerspectiveCamera( 50, aspect, 1, 10000 );
+			var camera = new THREE.PerspectiveCamera( 50, aspect, 1, 20000 );
 
-			//camera.position.z = 1;
-            camera.position.x = 103;
-            camera.position.y = -142;
-            camera.position.z = -122;
+            camera.position.set(256, -325, -142);
 			camera.updateMatrixWorld();
 
 			var renderer = new THREE.WebGLRenderer( { antialias: true } );
 			
             renderer.setPixelRatio( window.devicePixelRatio );
 			
-			
             renderer.domElement.style.position = "relative";
 			
             document.querySelector("#three").appendChild( renderer.domElement );
 
 			controls = new THREE.OrbitControls( camera, renderer.domElement );
-			
-            controls.addEventListener("change", function(){
-				Tone.Listener.updatePosition(camera);
-                })
+		    controls.maxPolarAngle = 2 * Math.PI;
+
+            controls.addEventListener("change", function(){ Tone.Listener.updatePosition(camera); })
 			
             //set the camera initially
 			Tone.Listener.updatePosition(camera);
@@ -211,7 +203,6 @@
             window.addEventListener("resize", onWindowResize);
             function animate() {
                 requestAnimationFrame( animate );
-                var r = Date.now() * 0.0005;
                 renderer.render( scene, camera );
                 controls.update();
                 updatePlaying();
